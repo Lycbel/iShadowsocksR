@@ -16,7 +16,7 @@
 + (TunnelInterface *) sharedInterface;
 - (instancetype) init NS_UNAVAILABLE;
 - (NSError *) setupWithPacketTunnelFlow:(NEPacketTunnelFlow *)packetFlow;
-- (void) processPackets;
+- (void) processPackets : (int)socksServerPort;
 - (void) writePacket:(NSData *)packet;
 - (void) startTun2Socks:(int)socksServerPort;
 - (void) stop;

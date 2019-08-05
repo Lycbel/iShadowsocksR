@@ -14,11 +14,23 @@
 #import <arpa/inet.h>
 #import "inet_chksum.h"
 #import "tun2socks/tun2socks.h"
+#include "system/BAddr.h"
+#include "misc/socks_proto.h"
 @import CocoaAsyncSocket;
-
 #define kTunnelInterfaceErrorDomain [NSString stringWithFormat:@"%@.TunnelInterface", [[NSBundle mainBundle] bundleIdentifier]]
+#define DNS_QR 0x80
+#define DNS_TC 0x02
+#define DNS_RCODE 0x0F
 
 @interface TunnelInterface () <GCDAsyncUdpSocketDelegate>
+@property (nonatomic) NEPacketTunnelFlow *tunnelPacketFlow;
+@property (nonatomic) NSMutableDictionary *localAddrByDnsReqId;
+@property (nonatomic) GCDAsyncUdpSocket *udpSocket;
+@property (nonatomic) int readFd;
+@property (nonatomic) int writeFd;
+@property (nonatomic) uint16_t socksServerPort;
+@property(nonatomic) BOOL isUdpForwardingEnabled;
+@property (nonatomic) dispatch_queue_t dispatchQueue;
 @end
 
 @implementation TunnelInterface {
@@ -91,7 +103,7 @@
     });
 }
 
-- (void) processPackets {
+- (void) processPackets: (int)socksServerPort  {
     __weak typeof(self) weakSelf = self;
     [_tunnelPacketFlow readPacketsWithCompletionHandler:^(NSArray<NSData *> *packets, NSArray<NSNumber *> *protocols) {
         __strong typeof(self) strongSelf = weakSelf;
@@ -100,16 +112,17 @@
             struct ip_hdr *iphdr = (struct ip_hdr *)data;
             uint8_t proto = IPH_PROTO(iphdr);
             if (proto == IP_PROTO_UDP) {
-                [strongSelf handleUdpPacket:packet];
+                [strongSelf handleUdpPacket:packet needPort: socksServerPort];
             }else if (proto == IP_PROTO_TCP) {
                 [strongSelf handleTcpPacket:packet];
             }
         }
-        [strongSelf processPackets];
+        [strongSelf processPackets : socksServerPort];
     }];
 }
 
 - (void) _startTun2Socks:(int)socksServerPort {
+    NSLog(@"port--->%d", socksServerPort);
     char socks_server[50];
     sprintf(socks_server, "127.0.0.1:%d", (int)socksServerPort);
 #if TCP_DATA_LOG_ENABLE
@@ -132,7 +145,7 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:kTun2SocksStoppedNotification object:nil];
 }
 
-- (void) handleTcpPacket:(NSData *)packet {
+- (void) handleTcpPacket:(NSData *)packet  {
     uint8_t message[TunnelMTU+2];
     memcpy(message + 2, packet.bytes, packet.length);
     message[0] = packet.length / 256;
@@ -140,37 +153,42 @@
     write(_writeFd , message , packet.length + 2);
 }
 
-- (void) handleUdpPacket:(NSData *)packet {
-    uint8_t *data = (uint8_t *)packet.bytes;
-    int data_len = (int)packet.length;
-    struct ip_hdr *iphdr = (struct ip_hdr *)data;
-    uint8_t version = IPH_V(iphdr);
-
-    switch (version) {
-        case 4: {
-            uint16_t iphdr_hlen = IPH_HL(iphdr) * 4;
-            data = data + iphdr_hlen;
-            data_len -= iphdr_hlen;
-            struct udp_hdr *udphdr = (struct udp_hdr *)data;
-            
-            data = data + sizeof(struct udp_hdr *);
-            data_len -= sizeof(struct udp_hdr *);
-            
-            NSData *outData = [[NSData alloc] initWithBytes:data length:data_len];
-            struct in_addr dest = { iphdr->dest.addr };
-            NSString *destHost = [NSString stringWithUTF8String:inet_ntoa(dest)];
-            NSString *key = [self strForHost:iphdr->dest.addr port:udphdr->dest];
-            NSString *value = [self strForHost:iphdr->src.addr port:udphdr->src];;
-            _udpSession[key] = value;
-            [_udpSocket sendData:outData toHost:destHost port:ntohs(udphdr->dest) withTimeout:30 tag:0];
-        } break;
-        case 6: {
-            
-        } break;
-    }
+- (void) handleUdpPacket:(NSData *)packet needPort: (int)socksServerPort  {
+    NSLog(@"get udp packet");
+    [self handleTcpPacket:packet];
+//    uint8_t *data = (uint8_t *)packet.bytes;
+//    int data_len = (int)packet.length;
+//    struct ip_hdr *iphdr = (struct ip_hdr *)data;
+//    uint8_t version = IPH_V(iphdr);
+//
+//    switch (version) {
+//        case 4: {
+//            uint16_t iphdr_hlen = IPH_HL(iphdr) * 4;
+//
+//            data = data + iphdr_hlen;
+//            data_len -= iphdr_hlen;
+//            struct udp_hdr *udphdr = (struct udp_hdr *)data;
+//
+//            data = data + sizeof(struct udp_hdr *);
+//            data_len -= sizeof(struct udp_hdr *);
+//
+//            NSData *outData = [[NSData alloc] initWithBytes:data length:data_len];
+//            struct in_addr dest = { iphdr->dest.addr };
+//            NSString *destHost = [NSString stringWithUTF8String:inet_ntoa(dest)];
+//            NSString *key = [self strForHost:iphdr->dest.addr port:udphdr->dest];
+//            NSString *value = [self strForHost:iphdr->src.addr port:udphdr->src];
+//            _udpSession[key] = value;
+//            NSLog(@"port---->%d", (int)(socksServerPort+1));
+//            [_udpSocket sendData:outData toHost:@"127.0.0.1" port:(socksServerPort+1) withTimeout:30 tag:0];
+//        } break;
+//        case 6: {
+//
+//        } break;
+//    }
 }
 
 - (void) udpSocket:(GCDAsyncUdpSocket *)sock didReceiveData:(NSData *)data fromAddress:(NSData *)address withFilterContext:(id)filterContext {
+    NSLog(@"did receive data");
     const struct sockaddr_in *addr = (const struct sockaddr_in *)[address bytes];
     ip_addr_p_t dest ={ addr->sin_addr.s_addr };
     in_port_t dest_port = addr->sin_port;
@@ -216,7 +234,6 @@
     pbuf_free(p_udp);
     [self writePacket:outData];
 }
-
 struct ip_hdr * generateNewIpHeader(u8_t proto, ip_addr_p_t src, ip_addr_p_t dest, uint16_t total_len) {
     struct ip_hdr *iphdr = malloc(sizeof(struct ip_hdr));
     IPH_VHL_SET(iphdr, 4, IP_HLEN / 4);
