@@ -193,6 +193,8 @@
 		9BF303461CC8A1F60096588E /* LogDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF303451CC8A1F60096588E /* LogDetailViewController.swift */; };
 		9BF3034B1CCA1B060096588E /* BaseEmptyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF3034A1CCA1B060096588E /* BaseEmptyView.swift */; };
 		9BF3034D1CCA20D80096588E /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BF3034C1CCA20D80096588E /* Logging.swift */; };
+		A1F8A61F22F932F700230515 /* lychelp.m in Sources */ = {isa = PBXBuildFile; fileRef = A1F8A61E22F932F700230515 /* lychelp.m */; };
+		A1F8A63322F9331000230515 /* lychelp.h in Headers */ = {isa = PBXBuildFile; fileRef = A1F8A63222F9331000230515 /* lychelp.h */; };
 		B803A6961D0165EA003EA9AA /* CloudViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B803A6951D0165EA003EA9AA /* CloudViewController.swift */; };
 		B803A6981D02B768003EA9AA /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = B803A6971D02B768003EA9AA /* API.swift */; };
 		B821B0F01D51DD8F0061E7B9 /* KeychainUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = B821B0EF1D51DD8F0061E7B9 /* KeychainUtils.swift */; };
@@ -1193,6 +1195,8 @@
 		9BF303451CC8A1F60096588E /* LogDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogDetailViewController.swift; sourceTree = "<group>"; };
 		9BF3034A1CCA1B060096588E /* BaseEmptyView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseEmptyView.swift; sourceTree = "<group>"; };
 		9BF3034C1CCA20D80096588E /* Logging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
+		A1F8A61E22F932F700230515 /* lychelp.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = lychelp.m; sourceTree = "<group>"; };
+		A1F8A63222F9331000230515 /* lychelp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = lychelp.h; sourceTree = "<group>"; };
 		A692B80DC5DB316AA1DED8CB /* Pods_TodayWidget.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TodayWidget.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A6C3522CED51B0487ECEE41F /* Pods-TodayWidget.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TodayWidget.release.xcconfig"; path = "Pods/Target Support Files/Pods-TodayWidget/Pods-TodayWidget.release.xcconfig"; sourceTree = "<group>"; };
 		B3AEA49B98CE7A4AD5F03EE1 /* Pods-iShadowsocksR.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iShadowsocksR.debug.xcconfig"; path = "Pods/Target Support Files/Pods-iShadowsocksR/Pods-iShadowsocksR.debug.xcconfig"; sourceTree = "<group>"; };
@@ -2388,6 +2392,8 @@
 		9BDA64141CAE25E0007F2581 /* tun2socks */ = {
 			isa = PBXGroup;
 			children = (
+				A1F8A61E22F932F700230515 /* lychelp.m */,
+				A1F8A63222F9331000230515 /* lychelp.h */,
 				9BDA64151CAE25E0007F2581 /* SocksUdpGwClient.c */,
 				9BDA64161CAE25E0007F2581 /* SocksUdpGwClient.h */,
 				9BDA64171CAE25E0007F2581 /* tun2socks.c */,
@@ -2542,6 +2548,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9BCE27A91CAE428200B1E561 /* TunnelInterface.h in Headers */,
+				A1F8A63322F9331000230515 /* lychelp.h in Headers */,
 				9BDA625E1CAE2576007F2581 /* PacketProcessor.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3514,6 +3521,7 @@
 				9BDA64E61CAE25E0007F2581 /* inet_chksum.c in Sources */,
 				9BDA64F31CAE25E0007F2581 /* netif.c in Sources */,
 				9BDA65B11CAE25E0007F2581 /* BTime.c in Sources */,
+				A1F8A61F22F932F700230515 /* lychelp.m in Sources */,
 				9BDA64E81CAE25E0007F2581 /* icmp.c in Sources */,
 				9BDA64E71CAE25E0007F2581 /* init.c in Sources */,
 				9BDA64301CAE25E0007F2581 /* PacketPassConnector.c in Sources */,

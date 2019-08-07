@@ -28,7 +28,7 @@
 
 #include "misc/debug.h"
 #include "base/BLog.h"
-
+#include "lychelp.h"
 #include "tun2socks/SocksUdpGwClient.h"
 
 #include "generated/blog_channel_SocksUdpGwClient.h"
@@ -62,6 +62,7 @@ static void connection_free (SocksUdpGwClient_connection *o);
 
 static void dgram_handler (SocksUdpGwClient_connection *o, int event)
 {
+    lycLog("dgram_handler");
     SocksUdpGwClient *client = o->client;
     ASSERT(client);
     
@@ -72,6 +73,8 @@ static void dgram_handler (SocksUdpGwClient_connection *o, int event)
 
 static void dgram_handler_received (SocksUdpGwClient_connection *o, uint8_t *data, int data_len)
 {
+    
+    lycLog("dgram_handler_received");
     SocksUdpGwClient *client = o->client;
     ASSERT(client);
     
@@ -235,6 +238,7 @@ static void connection_first_job_handler (SocksUdpGwClient_connection *con)
 
 static SocksUdpGwClient_connection *connection_init (SocksUdpGwClient *client, SocksUdpGwClient_conaddr conaddr, const uint8_t *data, int data_len)
 {
+    lycLog("connection_init");
     // allocate structure
     SocksUdpGwClient_connection *o = (SocksUdpGwClient_connection *) malloc(sizeof(*o));
     if (!o) {

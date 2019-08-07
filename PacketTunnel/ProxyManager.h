@@ -17,6 +17,7 @@ extern int sock_port (int fd);
 
 + (ProxyManager *)sharedManager;
 @property (nonatomic, readonly) int socksProxyPort;
+@property (nonatomic, readonly) int shadowsocksProxyPort;
 @property (nonatomic, readonly) int httpProxyPort;
 - (void)startSocksProxy: (SocksProxyCompletion)completion;
 - (void)stopSocksProxy;

@@ -25,13 +25,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include <stdint.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
 #include <limits.h>
-
 #include "misc/version.h"
 #include "misc/loggers_string.h"
 #include "misc/loglevel.h"
@@ -61,6 +59,7 @@
 #include "lwip/netif.h"
 #include "lwip/tcp.h"
 #include "tun2socks/SocksUdpGwClient.h"
+#include "lychelp.h"
 //#include <Foundation/Foundation.h>
 
 #ifndef BADVPN_USE_WINAPI
@@ -414,7 +413,6 @@ int tun2socks_main (int argc, char **argv, int fd, int mtu)
     // enter event loop
     BLog(BLOG_NOTICE, "entering event loop");
     BReactor_Exec(&ss);
-    
     // free clients
     LinkedList1Node *node;
     while ((node = LinkedList1_GetFirst(&tcp_clients)) != NULL) {
@@ -462,6 +460,7 @@ fail0:
 }
 
 void stop_tun2socks() {
+    lycLog("---------_>------<stop_tun2socks");
     terminate();
 }
 
@@ -660,6 +659,14 @@ int parse_arguments (int argc, char *argv[])
                 return 0;
             }
             options.socks_server_addr = argv[i + 1];
+            i++;
+        }
+        else if (!strcmp(arg, "--ssocks-server-addr")) {
+            if (1 >= argc - i) {
+                fprintf(stderr, "%s: requires an argument\n", arg);
+                return 0;
+            }
+            options.udpgw_remote_server_addr = argv[i + 1];
             i++;
         }
         else if (!strcmp(arg, "--username")) {
@@ -1155,7 +1162,8 @@ int process_device_udp_packet (uint8_t *data, int data_len)
     
     // submit packet to udpgw
     SocksUdpGwClient_SubmitPacket(&udpgw_client, local_addr, remote_addr, is_dns, data, data_len);
-    
+    logLL("SocksUdpGwClient_SubmitPacket,remote_addr%d",(int)(remote_addr.ipv4.port));
+    logLL("SocksUdpGwClient_SubmitPacket,remote_addrdd%d",51716);
     return 1;
     
 fail:
@@ -1849,6 +1857,7 @@ err_t client_sent_func (void *arg, struct tcp_pcb *tpcb, u16_t len)
 
 void udpgw_client_handler_received (void *unused, BAddr local_addr, BAddr remote_addr, const uint8_t *data, int data_len)
 {
+    lycLog("tunnel udpgw_client_handler_received");
     ASSERT(options.udpgw_remote_server_addr)
     ASSERT(local_addr.type == BADDR_TYPE_IPV4 || local_addr.type == BADDR_TYPE_IPV6)
     ASSERT(local_addr.type == remote_addr.type)

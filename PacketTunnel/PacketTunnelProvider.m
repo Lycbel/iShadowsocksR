@@ -163,6 +163,7 @@
 - (void)startSocksProxy {
     [self syncStartProxy: @"socks" completion:^(dispatch_group_t g, NSError *__autoreleasing *proxyError) {
         [[ProxyManager sharedManager] startSocksProxy:^(int port, NSError *error) {
+            NSLog(@"---_>socks port %d", port);
             *proxyError = error;
             dispatch_group_leave(g);
         }];
@@ -178,7 +179,7 @@
             [weakSelf addObserver:weakSelf forKeyPath:@"defaultPath" options:NSKeyValueObservingOptionInitial context:nil];
             [[TunnelInterface sharedInterface] startTun2Socks:[ProxyManager sharedManager].socksProxyPort];
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                [[TunnelInterface sharedInterface] processPackets :[ProxyManager sharedManager].socksProxyPort];
+                [[TunnelInterface sharedInterface] processPackets :  [ProxyManager sharedManager].shadowsocksProxyPort];
             });
         }
         if (strongSelf->_pendingStartCompletion) {

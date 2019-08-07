@@ -19,7 +19,7 @@ static DDLogLevel ddLogLevel = DDLogLevelWarning;
 #endif
 
 @interface ProxyManager () {
-    int _shadowsocksProxyPort;
+    // int _shadowsocksProxyPort;
     ShadowsocksProxyCompletion _shadowsocksCompletion;
     
     SocksProxyCompletion _socksCompletion;
@@ -145,6 +145,7 @@ void ssr_stop(void) {
     _socksCompletion = [completion copy];
     NSString *confContent = [NSString stringWithContentsOfURL:[Potatso sharedSocksConfUrl] encoding:NSUTF8StringEncoding error:nil];
     confContent = [confContent stringByReplacingOccurrencesOfString:@"${ssport}" withString:[NSString stringWithFormat:@"%d", _shadowsocksProxyPort]];
+    NSLog(@"config port for ss%@", confContent);
     int fd = [[AntinatServer sharedServer] startWithConfig:confContent];
     [self onSocksProxyCallback:fd];
 }

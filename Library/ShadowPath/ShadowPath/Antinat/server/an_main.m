@@ -125,6 +125,7 @@ HandleRequest ()
 	config_reference (conf);
 	conn = (conn_t *) malloc (sizeof (conn_t));
 	if (conn) {
+        NSLog(@"in ss get the connection");
 		conn_init_tcp (conn, conf, cli);
 		if (os_thread_exec (&thr, ChildThread, conn)) {
 			os_thread_detach (&thr);
@@ -184,6 +185,7 @@ reloadconfig (int x)
 		exit (EXIT_FAILURE);
 	}
 	log_log (NULL, LOG_EVT_SERVERRESTART, 0, conf);
+    NSLog(@"->in ss start port%d", config_getPort (conf));
 	if ((config_getPort (conf) != port) || (config_getInterface (conf) != ip)) {
 		if (srv != INVALID_SOCKET)
 			closesocket (srv);
